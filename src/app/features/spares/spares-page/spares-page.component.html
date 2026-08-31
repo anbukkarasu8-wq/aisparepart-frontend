@@ -1,0 +1,188 @@
+﻿<div class="spares-page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h1>
+        Spare Parts
+      </h1>
+
+      <p>
+        Find spare parts for your vehicle
+      </p>
+
+    </div>
+
+
+    <a
+      routerLink="/chat"
+      class="chat-link">
+
+      💬 Ask AI Assistant
+
+    </a>
+
+  </div>
+
+
+  <!-- SEARCH -->
+
+  <div class="search-area">
+
+    <input
+      type="text"
+      [formControl]="searchControl"
+      placeholder="Search spare parts..." />
+
+  </div>
+
+
+  <!-- CART -->
+
+  <div class="cart-info">
+
+    🛒 Quote Items:
+    <strong>
+      {{ getCartCount() }}
+    </strong>
+
+  </div>
+
+
+  <!-- PRODUCTS -->
+
+  <div class="products-grid">
+
+
+    <div
+      class="product-card"
+
+      *ngFor="
+        let product of products
+      ">
+
+
+      <div class="product-icon">
+        🔧
+      </div>
+
+
+      <h2>
+
+        {{ product.name }}
+
+      </h2>
+
+
+      <p class="brand">
+
+        Brand:
+        {{ product.brand }}
+
+      </p>
+
+
+      <p>
+
+        Category:
+        {{ product.category }}
+
+      </p>
+
+
+      <p>
+
+        Part Number:
+        {{ product.part_number }}
+
+      </p>
+
+
+      <div class="price">
+
+        ₹{{ product.selling_price }}
+
+      </div>
+
+
+      <div class="mrp">
+
+        MRP:
+        ₹{{ product.mrp }}
+
+      </div>
+
+
+      <div
+        class="stock"
+
+        [class.out-of-stock]="
+          product.stock <= 0
+        ">
+
+        <span
+          *ngIf="product.stock > 0">
+
+          In Stock:
+          {{ product.stock }}
+
+        </span>
+
+
+        <span
+          *ngIf="product.stock <= 0">
+
+          Out of Stock
+
+        </span>
+
+      </div>
+
+
+      <button
+        type="button"
+
+        [disabled]="
+          product.stock <= 0
+        "
+
+        (click)="addToQuote(product)">
+
+        Add to Quote
+
+      </button>
+
+
+    </div>
+
+
+    <!-- NO PRODUCTS -->
+
+    <div
+      class="no-products"
+
+      *ngIf="
+        products.length === 0
+      ">
+
+      <div>
+        🔍
+      </div>
+
+      <h2>
+        No spare parts found
+      </h2>
+
+      <p>
+        Try searching for another spare part.
+      </p>
+
+    </div>
+
+
+  </div>
+
+</div>

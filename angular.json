@@ -45,10 +45,12 @@
                   "maximumError": "1MB"
                 },
                 {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
-                }
+                  
+  "type": "anyComponentStyle",
+  "maximumWarning": "10kB",
+  "maximumError": "10kB"
+}
+                
               ],
               "outputHashing": "all"
             },
@@ -98,5 +100,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "04c2c997-3d46-40a3-b577-ae9fc4b9e4ae"
   }
 }

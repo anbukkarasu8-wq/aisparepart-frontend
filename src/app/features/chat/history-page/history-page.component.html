@@ -1,0 +1,398 @@
+<div class="history-page">
+
+  <!-- HEADER -->
+  <header class="history-header">
+
+    <div class="header-left">
+
+      <a
+        routerLink="/chat"
+        class="back-button"
+        title="Back to chat"
+      >
+        ←
+      </a>
+
+      <div class="header-title-area">
+
+        <h1>Chat History</h1>
+
+        <p>
+          Your previous spare-parts conversations
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="refresh()"
+      [disabled]="loading"
+    >
+      ↻
+      <span>Refresh</span>
+    </button>
+
+  </header>
+
+
+  <!-- ERROR -->
+  <div
+    *ngIf="errorMessage"
+    class="error-box"
+  >
+    {{ errorMessage }}
+  </div>
+
+
+  <!-- MAIN -->
+  <div class="history-layout">
+
+
+    <!-- ============================================== -->
+    <!-- LEFT SIDE - CHAT HISTORY -->
+    <!-- ============================================== -->
+
+    <aside class="history-sidebar">
+
+      <div class="sidebar-title">
+
+        <div>
+
+          <h2>Recent Chats</h2>
+
+          <p>
+            {{ sessions.length }}
+            conversation{{ sessions.length === 1 ? '' : 's' }}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- LOADING -->
+      <div
+        *ngIf="loading"
+        class="loading-state"
+      >
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading chats...
+        </p>
+
+      </div>
+
+
+      <!-- EMPTY -->
+      <div
+        *ngIf="
+          !loading &&
+          sessions.length === 0
+        "
+        class="empty-history"
+      >
+
+        <div class="empty-icon">
+          💬
+        </div>
+
+        <h3>
+          No chat history
+        </h3>
+
+        <p>
+          Start a conversation with
+          AI Spare Parts.
+        </p>
+
+        <a
+          routerLink="/chat"
+          class="start-chat-button"
+        >
+          Start New Chat
+        </a>
+
+      </div>
+
+
+      <!-- SESSION LIST -->
+      <div
+        *ngIf="
+          !loading &&
+          sessions.length > 0
+        "
+        class="session-list"
+      >
+
+        <button
+          type="button"
+          *ngFor="let session of sessions"
+          class="session-item"
+          [class.active]="
+            selectedSession?.session_id ===
+            session.session_id
+          "
+          (click)="openSession(session)"
+        >
+
+          <div class="session-icon">
+            💬
+          </div>
+
+
+          <div class="session-content">
+
+            <div class="session-title">
+
+              {{ getSessionTitle(session) }}
+
+            </div>
+
+
+            <div class="session-preview">
+
+              {{ getSessionPreview(session) }}
+
+            </div>
+
+
+            <div class="session-date">
+
+              {{ formatDate(session.created_at) }}
+
+            </div>
+
+          </div>
+
+
+          <div class="session-arrow">
+
+            ›
+
+          </div>
+
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <!-- ============================================== -->
+    <!-- RIGHT SIDE - CONVERSATION -->
+    <!-- ============================================== -->
+
+    <main class="conversation">
+
+
+      <!-- NO CHAT SELECTED -->
+
+      <div
+        *ngIf="!selectedSession"
+        class="no-selection"
+      >
+
+        <div class="no-selection-icon">
+          🔧
+        </div>
+
+        <h2>
+          Select a conversation
+        </h2>
+
+        <p>
+          Choose a chat from the left
+          to view your previous messages.
+        </p>
+
+      </div>
+
+
+      <!-- SELECTED CHAT -->
+
+      <ng-container
+        *ngIf="selectedSession"
+      >
+
+
+        <!-- CHAT HEADER -->
+
+        <div class="conversation-header">
+
+          <div class="conversation-heading">
+
+            <div class="conversation-icon">
+              💬
+            </div>
+
+            <div>
+
+              <h2>
+                {{ getSessionTitle(selectedSession) }}
+              </h2>
+
+              <p>
+                {{ formatDate(selectedSession.created_at) }}
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="closeConversation()"
+            title="Close"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <!-- CHAT MESSAGES -->
+
+        <div class="messages-container">
+
+
+          <!-- LOADING -->
+
+          <div
+            *ngIf="loadingMessages"
+            class="loading-messages"
+          >
+
+            <div class="spinner"></div>
+
+            <p>
+              Loading conversation...
+            </p>
+
+          </div>
+
+
+          <!-- MESSAGES -->
+
+          <div
+            *ngIf="
+              !loadingMessages &&
+              messages.length > 0
+            "
+            class="messages-list"
+          >
+
+            <div
+              *ngFor="let msg of messages"
+              class="message-row"
+              [class.user-row]="
+                msg.role === 'user'
+              "
+              [class.assistant-row]="
+                msg.role === 'assistant'
+              "
+            >
+
+
+              <!-- AVATAR -->
+
+              <div
+                class="message-avatar"
+                [class.user-avatar]="
+                  msg.role === 'user'
+                "
+                [class.ai-avatar]="
+                  msg.role === 'assistant'
+                "
+              >
+
+                <span
+                  *ngIf="
+                    msg.role === 'user'
+                  "
+                >
+                  You
+                </span>
+
+                <span
+                  *ngIf="
+                    msg.role === 'assistant'
+                  "
+                >
+                  AI
+                </span>
+
+              </div>
+
+
+              <!-- MESSAGE -->
+
+              <div class="message-content">
+
+                <div class="message-role">
+
+                  {{
+                    msg.role === 'user'
+                      ? 'You'
+                      : 'AI Spare Parts'
+                  }}
+
+                </div>
+
+
+                <div class="message-text">
+
+                  {{ msg.message }}
+
+                </div>
+
+
+                <div class="message-time">
+
+                  {{ formatTime(msg.created_at) }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- NO MESSAGES -->
+
+          <div
+            *ngIf="
+              !loadingMessages &&
+              messages.length === 0
+            "
+            class="no-messages"
+          >
+
+            <div class="no-messages-icon">
+              💬
+            </div>
+
+            <p>
+              No messages found.
+            </p>
+
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </main>
+
+  </div>
+
+</div>

@@ -1,0 +1,422 @@
+<div class="login-page">
+
+
+  <!-- Left side -->
+
+  <section class="login-info">
+
+    <div class="brand">
+
+      <div class="brand-icon">
+        ⚙️
+      </div>
+
+      <span>
+        AI Spare Parts
+      </span>
+
+    </div>
+
+
+    <div class="info-content">
+
+      <div class="ai-icon">
+        🤖
+      </div>
+
+
+      <h1>
+        Your Intelligent
+        <br>
+        Spare Parts Assistant
+      </h1>
+
+
+      <p>
+        Find compatible spare parts, check availability
+        and prepare quotations using our AI-powered
+        assistant.
+      </p>
+
+
+      <div class="features">
+
+        <div class="feature">
+
+          <span>✓</span>
+
+          <div>
+
+            <strong>
+              Smart Spare Parts Search
+            </strong>
+
+            <small>
+              Find parts based on your vehicle.
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="feature">
+
+          <span>✓</span>
+
+          <div>
+
+            <strong>
+              Vehicle Compatibility
+            </strong>
+
+            <small>
+              Find parts compatible with your vehicle.
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="feature">
+
+          <span>✓</span>
+
+          <div>
+
+            <strong>
+              Quick Quotations
+            </strong>
+
+            <small>
+              Add products and prepare quotations.
+            </small>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="copyright">
+
+      © 2026 AI Spare Parts Assistant
+
+    </div>
+
+  </section>
+
+
+
+  <!-- Right side -->
+
+  <section class="login-section">
+
+
+    <div class="login-card">
+
+
+      <div class="mobile-brand">
+
+        ⚙️ AI Spare Parts
+
+      </div>
+
+
+      <div class="login-heading">
+
+        <h2>
+          Welcome back
+        </h2>
+
+        <p>
+          Login to continue to your AI assistant
+        </p>
+
+      </div>
+
+
+      <!-- Login Form -->
+
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="login()"
+        class="login-form"
+      >
+
+
+        <!-- Email -->
+
+        <div class="form-group">
+
+          <label for="email">
+            Email address
+          </label>
+
+
+          <div
+            class="input-wrapper"
+            [class.input-error]="
+              loginForm.controls.email.touched &&
+              loginForm.controls.email.invalid
+            "
+          >
+
+            <span>
+              ✉
+            </span>
+
+
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="Enter your email"
+              autocomplete="email"
+            />
+
+          </div>
+
+
+          <small
+            class="validation-message"
+            *ngIf="
+              loginForm.controls.email.touched &&
+              loginForm.controls.email.hasError('required')
+            "
+          >
+
+            Email is required.
+
+          </small>
+
+
+          <small
+            class="validation-message"
+            *ngIf="
+              loginForm.controls.email.touched &&
+              loginForm.controls.email.hasError('email')
+            "
+          >
+
+            Please enter a valid email address.
+
+          </small>
+
+        </div>
+
+
+
+        <!-- Password -->
+
+        <div class="form-group">
+
+          <div class="label-row">
+
+            <label for="password">
+              Password
+            </label>
+
+
+            <a href="javascript:void(0)">
+              Forgot password?
+            </a>
+
+          </div>
+
+
+          <div
+            class="input-wrapper"
+            [class.input-error]="
+              loginForm.controls.password.touched &&
+              loginForm.controls.password.invalid
+            "
+          >
+
+            <span>
+              🔒
+            </span>
+
+
+            <input
+              id="password"
+              [type]="
+                showPassword
+                  ? 'text'
+                  : 'password'
+              "
+              formControlName="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            />
+
+
+            <button
+              type="button"
+              class="password-button"
+              (click)="togglePassword()"
+            >
+
+              {{ showPassword ? '🙈' : '👁' }}
+
+            </button>
+
+          </div>
+
+
+          <small
+            class="validation-message"
+            *ngIf="
+              loginForm.controls.password.touched &&
+              loginForm.controls.password.hasError('required')
+            "
+          >
+
+            Password is required.
+
+          </small>
+
+
+          <small
+            class="validation-message"
+            *ngIf="
+              loginForm.controls.password.touched &&
+              loginForm.controls.password.hasError('minlength')
+            "
+          >
+
+            Password must contain at least 6 characters.
+
+          </small>
+
+        </div>
+
+
+
+        <!-- Remember -->
+
+        <div class="remember-row">
+
+          <label>
+
+            <input
+              type="checkbox"
+            />
+
+            <span>
+              Remember me
+            </span>
+
+          </label>
+
+        </div>
+
+
+
+        <!-- Login Error -->
+
+        <div
+          class="login-error"
+          *ngIf="loginError"
+        >
+
+          ⚠️
+
+          {{ loginError }}
+
+        </div>
+
+
+
+        <!-- Login button -->
+
+        <button
+          type="submit"
+          class="login-button"
+          [disabled]="isLoading"
+        >
+
+          <span *ngIf="!isLoading">
+            Login
+          </span>
+
+
+          <span *ngIf="isLoading">
+            Logging in...
+          </span>
+
+        </button>
+
+
+      </form>
+
+
+
+      <!-- Demo account -->
+
+      <div class="demo-box">
+
+        <div class="demo-title">
+
+          Demo Login
+
+        </div>
+
+
+        <div class="demo-details">
+
+          <div>
+            <strong>Email:</strong>
+            user&#64;example.com
+          </div>
+
+          <div>
+            <strong>Password:</strong>
+            123456
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          (click)="useDemoLogin()"
+        >
+
+          Use Demo Account
+
+        </button>
+
+      </div>
+
+
+      <!-- Register -->
+
+      <div class="register">
+
+        Don't have an account?
+
+        <a href="javascript:void(0)">
+          Create account
+        </a>
+
+      </div>
+
+
+      <!-- Security -->
+
+      <div class="security">
+
+        🔒 Your information is securely protected.
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
