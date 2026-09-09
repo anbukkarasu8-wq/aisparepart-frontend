@@ -1,17 +1,12 @@
-﻿<div
-  class="chat-layout"
-  [class.sidebar-hidden]="!sidebarOpen"
->
+﻿<div class="chat-layout">
 
   <!-- SIDEBAR -->
-
   <aside
     class="sidebar"
     [class.closed]="!sidebarOpen"
   >
 
     <!-- SIDEBAR HEADER -->
-
     <div class="sidebar-header">
 
       <div class="brand">
@@ -21,7 +16,6 @@
         </div>
 
         <div>
-
           <div class="brand-title">
             AI Spare Parts
           </div>
@@ -29,157 +23,19 @@
           <div class="brand-subtitle">
             Spare Parts Assistant
           </div>
-
         </div>
 
       </div>
 
-
+      <!-- MOBILE CLOSE BUTTON -->
       <button
         type="button"
         class="sidebar-close"
         (click)="toggleSidebar()"
+        aria-label="Close sidebar"
+        title="Close sidebar"
       >
-        ×
-      </button>
-
-    </div>
-
-
-    <!-- NEW CHAT -->
-
-    <button
-      type="button"
-      class="new-chat-button"
-      (click)="newChat()"
-    >
-
-      <span class="plus-icon">
-        +
-      </span>
-
-      New chat
-
-    </button>
-
-
-    <!-- RECENT CHATS -->
-
-    <div class="history-heading">
-
-      <span>
-        Recent chats
-      </span>
-
-
-      <!-- HISTORY PAGE -->
-
-      <a
-        routerLink="/history"
-        class="history-page-link"
-        title="View all chat history"
-      >
-
-        🕘
-
-      </a>
-
-    </div>
-
-
-    <!-- HISTORY LIST -->
-
-    <div class="history-list">
-
-
-      <!-- EMPTY HISTORY -->
-
-      <div
-        *ngIf="sessions.length === 0"
-        class="empty-history"
-      >
-
-        <div class="empty-icon">
-          💬
-        </div>
-
-        <div>
-          No recent chats
-        </div>
-
-      </div>
-
-
-      <!-- CHAT SESSIONS -->
-
-      <div
-        *ngFor="
-          let session of sessions;
-          trackBy: trackSession
-        "
-        class="history-item"
-        [class.active]="
-          session.session_id === currentSessionId
-        "
-        (click)="openSession(session)"
-      >
-
-        <div class="history-icon">
-          💬
-        </div>
-
-
-        <div class="history-content">
-
-          <div class="history-title">
-
-            {{ getSessionTitle(session) }}
-
-          </div>
-
-
-          <div class="history-preview">
-
-            {{ getSessionPreview(session) }}
-
-          </div>
-
-        </div>
-
-
-        <button
-          type="button"
-          class="delete-history"
-          title="Delete"
-          (click)="
-            $event.stopPropagation();
-            deleteSession(session.session_id)
-          "
-        >
-
-          ×
-
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <!-- SIDEBAR BOTTOM -->
-
-    <div class="sidebar-bottom">
-
-      <button
-        type="button"
-        class="clear-history-button"
-        (click)="clearAllChats()"
-      >
-
-        🗑
-
-        Clear history
-
+        ✕
       </button>
 
     </div>
@@ -187,27 +43,31 @@
   </aside>
 
 
-  <!-- MAIN CHAT -->
+  <!-- MOBILE SIDEBAR OVERLAY -->
+  <div
+    *ngIf="sidebarOpen"
+    class="sidebar-overlay"
+    (click)="toggleSidebar()"
+  ></div>
 
+
+  <!-- MAIN CHAT -->
   <main class="chat-main">
 
-
     <!-- HEADER -->
-
     <header class="chat-header">
 
       <div class="header-left">
 
-
+        <!-- MOBILE MENU BUTTON -->
         <button
-          *ngIf="!sidebarOpen"
           type="button"
           class="menu-button"
           (click)="toggleSidebar()"
+          aria-label="Open sidebar"
+          title="Open sidebar"
         >
-
           ☰
-
         </button>
 
 
@@ -216,7 +76,6 @@
           <div class="header-title">
             AI Spare Parts
           </div>
-
 
           <div class="header-status">
 
@@ -230,35 +89,18 @@
 
       </div>
 
-
-      <button
-        type="button"
-        class="header-new-chat"
-        (click)="newChat()"
-      >
-
-        + New chat
-
-      </button>
-
     </header>
 
 
     <!-- MESSAGES -->
-
     <div
       class="messages-container"
       #messagesContainer
     >
 
-
       <!-- WELCOME -->
-
       <div
-        *ngIf="
-          messages.length === 0 &&
-          !isLoading
-        "
+        *ngIf="messages.length === 0 && !isLoading"
         class="welcome-section"
       >
 
@@ -266,89 +108,37 @@
           🔧
         </div>
 
-
         <h1>
           How can I help you?
         </h1>
-
 
         <p>
           Ask me about vehicle spare parts,
           compatibility, prices and more.
         </p>
 
-
-        <!-- SUGGESTIONS -->
-
-        <div class="suggestions">
-
-          <button
-            *ngFor="
-              let suggestion of suggestions
-            "
-            type="button"
-            class="suggestion-card"
-            (click)="
-              useSuggestion(suggestion)
-            "
-          >
-
-            <span class="suggestion-icon">
-              🔧
-            </span>
-
-
-            <span>
-              {{ suggestion }}
-            </span>
-
-
-            <span class="suggestion-arrow">
-              →
-            </span>
-
-          </button>
-
-        </div>
-
       </div>
 
 
       <!-- MESSAGE LIST -->
-
       <div
         *ngIf="messages.length > 0"
         class="messages-list"
       >
 
-
         <div
-          *ngFor="
-            let msg of messages;
-            trackBy: trackMessage
-          "
+          *ngFor="let msg of messages"
           class="message-row"
-          [class.user-row]="
-            msg.role === 'user'
-          "
-          [class.assistant-row]="
-            msg.role === 'assistant'
-          "
+          [class.user-row]="msg.role === 'user'"
+          [class.assistant-row]="msg.role === 'assistant'"
         >
 
-
           <!-- AI -->
-
-          <ng-container
-            *ngIf="
-              msg.role === 'assistant'
-            "
-          >
+          <ng-container *ngIf="msg.role === 'assistant'">
 
             <div class="avatar assistant-avatar">
               AI
             </div>
-
 
             <div class="message-wrapper">
 
@@ -356,18 +146,11 @@
                 AI Spare Parts
               </div>
 
-
               <div class="assistant-message">
-
                 {{ msg.message }}
-
               </div>
 
-
               <div class="message-time">
-
-                {{ formatTime(msg.created_at) }}
-
               </div>
 
             </div>
@@ -376,33 +159,50 @@
 
 
           <!-- USER -->
+          <ng-container *ngIf="msg.role === 'user'">
 
-          <ng-container
-            *ngIf="
-              msg.role === 'user'
-            "
-          >
-
-            <div
-              class="message-wrapper user-wrapper"
-            >
+            <div class="message-wrapper user-wrapper">
 
               <div class="message-name user-name">
                 You
               </div>
 
 
-              <div class="user-message">
+              <!-- USER ATTACHED IMAGE -->
+              <div
+                *ngIf="msg.image_url"
+                class="user-message-image-wrapper"
+              >
 
-                {{ msg.message }}
+                <a
+                  [href]="msg.image_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="image-link"
+                  title="Click to view full image"
+                >
+
+                  <img
+                    [src]="msg.image_url"
+                    alt="Attached spare part"
+                    class="user-message-image"
+                  />
+
+                </a>
 
               </div>
 
 
+              <div
+                class="user-message"
+                *ngIf="msg.message"
+              >
+                {{ msg.message }}
+              </div>
+
+
               <div class="message-time user-time">
-
                 {{ formatTime(msg.created_at) }}
-
               </div>
 
             </div>
@@ -418,7 +218,6 @@
 
 
         <!-- LOADING -->
-
         <div
           *ngIf="isLoading"
           class="message-row assistant-row"
@@ -428,13 +227,11 @@
             AI
           </div>
 
-
           <div class="message-wrapper">
 
             <div class="message-name">
               AI Spare Parts
             </div>
-
 
             <div class="typing-message">
 
@@ -452,53 +249,165 @@
 
 
       <!-- ERROR -->
-
       <div
         *ngIf="errorMessage"
         class="error-message"
       >
-
         {{ errorMessage }}
-
       </div>
 
     </div>
 
 
     <!-- INPUT -->
-
     <div class="input-area">
 
+      <!-- SELECTED IMAGE PREVIEW -->
+      <div
+        *ngIf="imagePreviewUrl"
+        class="image-preview-bar"
+      >
+
+        <div class="preview-card">
+
+          <img
+            [src]="imagePreviewUrl"
+            alt="Selected spare part image"
+            class="preview-thumbnail"
+          />
+
+
+          <button
+            type="button"
+            class="remove-preview-btn"
+            (click)="removeSelectedImage()"
+            [disabled]="isUploadingImage"
+            title="Remove image"
+            aria-label="Remove image"
+          >
+            ✕
+          </button>
+
+
+          <!-- Upload Progress -->
+          <div
+            *ngIf="isUploadingImage"
+            class="upload-overlay"
+          >
+
+            <div class="progress-spinner"></div>
+
+            <span class="progress-number">
+              {{ uploadProgress }}%
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="preview-info">
+
+          <span class="preview-filename">
+            {{ selectedFile?.name }}
+          </span>
+
+          <span
+            *ngIf="isUploadingImage"
+            class="upload-status-text"
+          >
+            Uploading to Firebase Storage
+            ({{ uploadProgress }}%)...
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- IMAGE UPLOAD ERROR -->
+      <div
+        *ngIf="imageUploadError"
+        class="image-error-banner"
+      >
+
+        <span>
+          ⚠️ {{ imageUploadError }}
+        </span>
+
+        <button
+          type="button"
+          class="close-error-btn"
+          (click)="imageUploadError = ''"
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+      <!-- MAIN INPUT BOX -->
       <div class="input-box">
 
+        <!-- ATTACH IMAGE -->
+        <button
+          type="button"
+          class="attach-button"
+          [disabled]="isLoading || isUploadingImage"
+          (click)="triggerFileInput()"
+          title="Attach image (JPG, PNG, WEBP)"
+          aria-label="Attach image"
+        >
+
+          <span class="plus-icon">
+            +
+          </span>
+
+        </button>
+
+
+        <!-- HIDDEN FILE INPUT -->
+        <input
+          #fileInput
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+          style="display: none"
+          (change)="onFileSelected($event)"
+        />
+
+
+        <!-- MESSAGE INPUT -->
         <textarea
+          rows="1"
+          placeholder="Ask about spare parts or upload an image..."
+          [disabled]="isLoading || isUploadingImage"
           [(ngModel)]="messageText"
           (keydown.enter)="onEnter($event)"
-          rows="1"
-          placeholder="Ask about spare parts..."
-          [disabled]="isLoading"
         ></textarea>
 
 
+        <!-- SEND -->
         <button
           type="button"
           class="send-button"
           [disabled]="
-            !messageText.trim() ||
-            isLoading
+            isLoading ||
+            isUploadingImage ||
+            (!messageText.trim() && !selectedFile)
           "
           (click)="sendMessage()"
+          title="Send message"
+          aria-label="Send message"
         >
 
           <span
-            *ngIf="!isLoading"
+            *ngIf="!isLoading && !isUploadingImage"
           >
             ➤
           </span>
 
-
           <span
-            *ngIf="isLoading"
+            *ngIf="isLoading || isUploadingImage"
             class="spinner"
           >
           </span>
@@ -508,6 +417,7 @@
       </div>
 
 
+      <!-- INPUT HELP -->
       <div class="input-help">
 
         AI Spare Parts can make mistakes.

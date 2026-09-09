@@ -40,6 +40,13 @@ export class HistoryPageComponent
 
 
   // =====================================================
+  // USER
+  // =====================================================
+
+
+
+
+  // =====================================================
   // ALL CHAT SESSIONS
   // =====================================================
 
@@ -99,22 +106,28 @@ export class HistoryPageComponent
     this.errorMessage = '';
 
 
-    this.chatService
+      this.chatService
       .getChatSessions()
       .subscribe({
-
         next: (response) => {
 
           this.loading = false;
 
 
-          if (
-            response &&
-            response.success
-          ) {
+          if (response) {
 
             this.sessions =
-              response.sessions || [];
+              response.data || [];
+
+
+            if (
+              this.sessions.length === 0
+            ) {
+
+              this.errorMessage =
+                'No chat history found.';
+
+            }
 
           } else {
 
@@ -136,6 +149,8 @@ export class HistoryPageComponent
             'Failed to load chat sessions:',
             error
           );
+
+          this.sessions = [];
 
           this.errorMessage =
             'Unable to connect to the backend.';
@@ -186,13 +201,20 @@ export class HistoryPageComponent
           this.loadingMessages = false;
 
 
-          if (
-            response &&
-            response.success
-          ) {
+          if (response) {
 
             this.messages =
-              response.messages || [];
+              response.data || [];
+
+
+            if (
+              this.messages.length === 0
+            ) {
+
+              this.errorMessage =
+                'No messages found for this chat.';
+
+            }
 
           } else {
 
@@ -214,6 +236,8 @@ export class HistoryPageComponent
             'Failed to load messages:',
             error
           );
+
+          this.messages = [];
 
           this.errorMessage =
             'Unable to load this conversation.';

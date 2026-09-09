@@ -1,137 +1,46 @@
-import { Component } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
-
-import { ChatService } from './core/services/chat.service';
-
-
-interface ChatMessage {
-  role: 'user' | 'assistant';
-  message: string;
-}
-
+import { Router, RouterOutlet } from '@angular/router';
+import { AuthService } from './auth.service';
+import { SidebarComponent } from './sidebar/sidebar.component';
+import { HttpClientModule } from '@angular/common/http';
+import { IonApp, IonSplitPane, IonMenu, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonFooter, IonRouterOutlet, IonIcon } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { trashOutline, logOutOutline, addOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-root',
-
   standalone: true,
-
-  imports: [
-    CommonModule,
-    FormsModule
-  ],
-
+  imports: [CommonModule, HttpClientModule, SidebarComponent, IonApp, RouterOutlet],
   templateUrl: './app.component.html',
-
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-
-
 export class AppComponent {
-
   title = 'AI Spare Parts';
 
-  message = '';
+  constructor(public authService: AuthService, public router: Router) {
+    addIcons({ trashOutline, logOutOutline, addOutline });
+  }
 
-  loading = false;
+  isLoginPage(): boolean {
+    const url = this.router.url;
+    return url.includes('/login') || url.includes('/register') || url === '/';
+  }
 
-  sessionId = 'demo-session-001';
-
-  messages: ChatMessage[] = [];
-
-
-  constructor(
-    private chatService: ChatService
-  ) {}
-
-
-  sendMessage(): void {
-
-    const text = this.message.trim();
-
-    if (!text) {
-      return;
-    }
-
-
-    // Add user's message to the screen
-    this.messages.push({
-      role: 'user',
-      message: text
+  logout() {
+    this.authService.logout().subscribe({
+      next: () => {
+        console.log('User logged out');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => console.error('Logout error', err)
     });
-
-
-    // Clear input box
-    this.message = '';
-
-    // Show loading
-    this.loading = true;
-
-
-    // Send message to Python backend
-    this.chatService
-      .sendMessage(this.sessionId, text)
-      .subscribe({
-
-        next: (response) => {
-
-          console.log(
-            'Backend response:',
-            response
-          );
-
-
-          // Add chatbot response
-          this.messages.push({
-            role: 'assistant',
-            message: response.response
-          });
-
-
-          this.loading = false;
-        },
-
-
-        error: (error: HttpErrorResponse) => {
-
-          console.error(
-            'Chat API Error:',
-            error
-          );
-
-
-          this.messages.push({
-            role: 'assistant',
-            message:
-              'Sorry, something went wrong. Please try again.'
-          });
-
-
-          this.loading = false;
-        }
-
-      });
-
   }
 
-
-  sendOnEnter(event: Event): void {
-
-    const keyboardEvent =
-      event as KeyboardEvent;
-
-
-    if (
-      keyboardEvent.key === 'Enter' &&
-      !keyboardEvent.shiftKey
-    ) {
-
-      keyboardEvent.preventDefault();
-
-      this.sendMessage();
-    }
-
+  newChat() {
+    localStorage.removeItem('ai-spare-parts-session-id');
+    sessionStorage.removeItem('ai-spare-parts-session-id');
+    this.router.navigate(['/chat']);
   }
-
 }

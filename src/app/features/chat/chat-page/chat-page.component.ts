@@ -4,14 +4,15 @@ import {
   AfterViewChecked,
   ElementRef,
   ViewChild,
-  inject
+  inject,
+  HostListener
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
 
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 
 import {
   ChatService,
@@ -19,8 +20,16 @@ import {
   ChatSession
 } from '../../../core/services/chat.service';
 
+import { AuthService } from '../../../auth.service';
+import { RecentChatService } from '../../../recent-chat.service';
+
+import {
+  FirebaseStorageService
+} from '../../../core/services/firebase-storage.service';
+
 
 @Component({
+
   selector: 'app-chat-page',
 
   standalone: true,
@@ -28,76 +37,152 @@ import {
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink
   ],
 
   templateUrl: './chat-page.component.html',
 
   styleUrl: './chat-page.component.scss'
+
 })
+
+
 export class ChatPageComponent
   implements OnInit, AfterViewChecked {
 
 
+  // ==========================================
+  // CHAT SERVICE
+  // ==========================================
+
   private chatService =
     inject(ChatService);
 
+  private recentChatService = inject(RecentChatService);
+
+  private authService = inject(AuthService);
+
+  private firebaseStorageService = inject(FirebaseStorageService);
+
+  private route =
+    inject(ActivatedRoute);
+
+
+  // ==========================================
+  // VIEW REFS
+  // ==========================================
 
   @ViewChild('messagesContainer')
   messagesContainer?: ElementRef;
 
+  @ViewChild('fileInput')
+  fileInput?: ElementRef<HTMLInputElement>;
 
+
+  // ==========================================
+  // IMAGE UPLOAD STATE
+  // ==========================================
+
+  selectedFile: File | null = null;
+
+  imagePreviewUrl: string | null = null;
+
+  isUploadingImage = false;
+
+  uploadProgress = 0;
+
+  imageUploadError = '';
+
+
+  // ==========================================
   // SIDEBAR
+  // ==========================================
 
-  sidebarOpen = true;
+  // Desktop:
+  // Sidebar starts OPEN
+  //
+  // Mobile:
+  // Sidebar starts CLOSED
+  sidebarOpen = window.innerWidth > 768;
 
 
+  // ==========================================
   // CURRENT SESSION
+  // ==========================================
 
   currentSessionId = '';
 
 
+  // ==========================================
+  // USER
+  // ==========================================
+
+
+  // ==========================================
   // MESSAGES
+  // ==========================================
 
   messages: ChatMessage[] = [];
 
 
+  // ==========================================
   // HISTORY
+  // ==========================================
 
   sessions: ChatSession[] = [];
 
 
+  // ==========================================
   // INPUT
+  // ==========================================
 
   messageText = '';
 
 
+  // ==========================================
   // LOADING
+  // ==========================================
 
   isLoading = false;
 
 
+  // ==========================================
   // ERROR
+  // ==========================================
 
   errorMessage = '';
 
 
+  // ==========================================
   // SUGGESTIONS
+  // ==========================================
 
   suggestions: string[] = [
+
     'I need brake pads for Hyundai Creta',
+
     'I need an oil filter',
+
     'I need clutch parts'
+
   ];
 
 
-  // =====================================================
+  // ==========================================
   // INITIALIZE
-  // =====================================================
+  // ==========================================
 
   ngOnInit(): void {
 
-    this.createOrRestoreSession();
+    const paramSessionId =
+      this.route.snapshot.paramMap.get('sessionId');
+
+    if (paramSessionId) {
+      this.currentSessionId = paramSessionId;
+      localStorage.setItem('ai-spare-parts-session-id', paramSessionId);
+      sessionStorage.setItem('ai-spare-parts-session-id', paramSessionId);
+    } else {
+      this.createOrRestoreSession();
+    }
 
     this.loadSessions();
 
@@ -106,9 +191,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // AFTER VIEW
-  // =====================================================
+  // ==========================================
 
   ngAfterViewChecked(): void {
 
@@ -117,14 +202,17 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // CREATE OR RESTORE SESSION
-  // =====================================================
+  // ==========================================
 
   private createOrRestoreSession(): void {
 
     const savedSessionId =
       localStorage.getItem(
+        'ai-spare-parts-session-id'
+      ) ||
+      sessionStorage.getItem(
         'ai-spare-parts-session-id'
       );
 
@@ -144,9 +232,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // CREATE NEW SESSION
-  // =====================================================
+  // ==========================================
 
   private createFreshSession(): void {
 
@@ -164,12 +252,17 @@ export class ChatPageComponent
       this.currentSessionId
     );
 
+    sessionStorage.setItem(
+      'ai-spare-parts-session-id',
+      this.currentSessionId
+    );
+
   }
 
 
-  // =====================================================
+  // ==========================================
   // SIDEBAR
-  // =====================================================
+  // ==========================================
 
   toggleSidebar(): void {
 
@@ -179,13 +272,15 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // NEW CHAT
-  // =====================================================
+  // ==========================================
 
   newChat(): void {
 
     this.createFreshSession();
+
+    this.removeSelectedImage();
 
     this.messages = [];
 
@@ -196,9 +291,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // LOAD CHAT SESSIONS
-  // =====================================================
+  // ==========================================
 
   loadSessions(): void {
 
@@ -208,13 +303,10 @@ export class ChatPageComponent
 
         next: (response) => {
 
-          if (
-            response &&
-            response.success
-          ) {
+          if (response) {
 
             this.sessions =
-              response.sessions || [];
+              response.data || [];
 
           } else {
 
@@ -224,12 +316,18 @@ export class ChatPageComponent
 
         },
 
+
         error: (error) => {
 
           console.error(
+
             'Unable to load sessions:',
+
             error
+
           );
+
+          this.sessions = [];
 
         }
 
@@ -238,9 +336,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // LOAD CURRENT HISTORY
-  // =====================================================
+  // ==========================================
 
   private loadCurrentHistory(): void {
 
@@ -259,23 +357,28 @@ export class ChatPageComponent
 
         next: (response) => {
 
-          if (
-            response &&
-            response.success
-          ) {
+          if (response) {
 
             this.messages =
-              response.messages || [];
+              response.data || [];
+
+          } else {
+
+            this.messages = [];
 
           }
 
         },
 
+
         error: (error) => {
 
           console.error(
+
             'Unable to load history:',
+
             error
+
           );
 
         }
@@ -285,9 +388,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // OPEN OLD CHAT
-  // =====================================================
+  // ==========================================
 
   openSession(
     session: ChatSession
@@ -308,8 +411,11 @@ export class ChatPageComponent
 
 
     localStorage.setItem(
+
       'ai-spare-parts-session-id',
+
       this.currentSessionId
+
     );
 
 
@@ -331,13 +437,10 @@ export class ChatPageComponent
           this.isLoading = false;
 
 
-          if (
-            response &&
-            response.success
-          ) {
+          if (response) {
 
             this.messages =
-              response.messages || [];
+              response.data || [];
 
           } else {
 
@@ -348,14 +451,20 @@ export class ChatPageComponent
 
         },
 
+
         error: (error) => {
 
           this.isLoading = false;
 
+
           console.error(
+
             'Unable to open chat:',
+
             error
+
           );
+
 
           this.errorMessage =
             'Unable to load this conversation.';
@@ -367,19 +476,101 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
+  // IMAGE SELECTION & REMOVAL
+  // ==========================================
+
+  triggerFileInput(): void {
+
+    if (this.isLoading || this.isUploadingImage) {
+
+      return;
+
+    }
+
+    this.fileInput?.nativeElement.click();
+
+  }
+
+
+  onFileSelected(event: Event): void {
+
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files || input.files.length === 0) {
+
+      return;
+
+    }
+
+    const file = input.files[0];
+
+    const validation =
+      this.firebaseStorageService.validateImage(file);
+
+    if (!validation.valid) {
+
+      this.imageUploadError =
+        validation.error || 'Invalid image format.';
+
+      this.removeSelectedImage();
+
+      return;
+
+    }
+
+    this.imageUploadError = '';
+
+    this.selectedFile = file;
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+
+      this.imagePreviewUrl =
+        e.target?.result as string;
+
+    };
+
+    reader.readAsDataURL(file);
+
+  }
+
+
+  removeSelectedImage(): void {
+
+    this.selectedFile = null;
+
+    this.imagePreviewUrl = null;
+
+    this.isUploadingImage = false;
+
+    this.uploadProgress = 0;
+
+    this.imageUploadError = '';
+
+    if (this.fileInput?.nativeElement) {
+
+      this.fileInput.nativeElement.value = '';
+
+    }
+
+  }
+
+
+  // ==========================================
   // SEND MESSAGE
-  // =====================================================
+  // ==========================================
 
   sendMessage(): void {
 
-    const text =
+    let text =
       this.messageText.trim();
 
-
     if (
-      !text ||
-      this.isLoading
+      (!text && !this.selectedFile) ||
+      this.isLoading ||
+      this.isUploadingImage
     ) {
 
       return;
@@ -396,13 +587,96 @@ export class ChatPageComponent
 
     this.errorMessage = '';
 
+    this.imageUploadError = '';
+
+
+    // ------------------------------------------------------
+    // SEND WITH IMAGE UPLOAD
+    // ------------------------------------------------------
+
+    if (this.selectedFile) {
+
+      const fileToUpload = this.selectedFile;
+
+      const userId =
+        this.authService.getCurrentUser()?.uid || 'anonymous';
+
+      this.isUploadingImage = true;
+
+      this.isLoading = true;
+
+      this.uploadProgress = 0;
+
+      this.firebaseStorageService
+        .uploadChatbotImage(
+          fileToUpload,
+          userId,
+          this.currentSessionId
+        )
+        .subscribe({
+          next: (event: any) => {
+            this.uploadProgress =
+              event.progress;
+
+            if (event.downloadUrl) {
+              const downloadUrl =
+                event.downloadUrl;
+
+              this.isUploadingImage = false;
+
+              this.removeSelectedImage();
+
+              this.submitMessage(
+                text,
+                downloadUrl
+              );
+            }
+          },
+          error: (err: any) => {
+            this.isUploadingImage = false;
+
+            this.isLoading = false;
+
+            this.imageUploadError =
+              err.message || 'Image upload failed. Please try again.';
+
+            console.error(
+              'Image upload error:',
+              err
+            );
+          }
+        });
+
+      return;
+
+    }
+
+
+    // ------------------------------------------------------
+    // TEXT-ONLY MESSAGE (EXISTING BEHAVIOR)
+    // ------------------------------------------------------
+
     this.isLoading = true;
 
+    this.submitMessage(text, null);
+
+  }
+
+
+  // ==========================================
+  // SUBMIT MESSAGE TO BACKEND
+  // ==========================================
+
+  private submitMessage(
+    text: string,
+    imageUrl: string | null
+  ): void {
 
     this.chatService
       .sendMessage(
         this.currentSessionId,
-        text
+        text,
+        imageUrl
       )
       .subscribe({
 
@@ -410,15 +684,20 @@ export class ChatPageComponent
 
           this.isLoading = false;
 
-
-          if (
-            response &&
-            response.success
-          ) {
+          if (response) {
 
             this.messageText = '';
-
-            this.loadCurrentHistory();
+        // Save/update recent chat entry
+        this.recentChatService.upsertChat({
+          id: this.currentSessionId,
+          title: this.getSessionTitle({
+            session_id: this.currentSessionId,
+            last_message: text
+          } as any),
+          createdAt: new Date().toISOString(),
+          lastMessage: text
+        });
+        this.loadCurrentHistory();
 
             this.loadSessions();
 
@@ -450,9 +729,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // SUGGESTION
-  // =====================================================
+  // ==========================================
 
   useSuggestion(
     suggestion: string
@@ -466,9 +745,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // ENTER KEY
-  // =====================================================
+  // ==========================================
 
   onEnter(
     event: Event
@@ -487,16 +766,16 @@ export class ChatPageComponent
     }
 
 
-    keyboardEvent.preventDefault();
-
     this.sendMessage();
+
+    keyboardEvent.preventDefault();
 
   }
 
 
-  // =====================================================
+  // ==========================================
   // SESSION TITLE
-  // =====================================================
+  // ==========================================
 
   getSessionTitle(
     session: ChatSession
@@ -533,9 +812,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // SESSION PREVIEW
-  // =====================================================
+  // ==========================================
 
   getSessionPreview(
     session: ChatSession
@@ -572,9 +851,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // DELETE SESSION FROM UI
-  // =====================================================
+  // ==========================================
 
   deleteSession(
     sessionId: string
@@ -582,9 +861,11 @@ export class ChatPageComponent
 
     this.sessions =
       this.sessions.filter(
+
         session =>
           session.session_id !==
           sessionId
+
       );
 
 
@@ -600,9 +881,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // CLEAR HISTORY FROM UI
-  // =====================================================
+  // ==========================================
 
   clearAllChats(): void {
 
@@ -613,9 +894,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // TRACK SESSION
-  // =====================================================
+  // ==========================================
 
   trackSession(
     index: number,
@@ -627,9 +908,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // TRACK MESSAGE
-  // =====================================================
+  // ==========================================
 
   trackMessage(
     index: number,
@@ -641,9 +922,9 @@ export class ChatPageComponent
   }
 
 
-  // =====================================================
+  // ==========================================
   // FORMAT TIME
-  // =====================================================
+  // ==========================================
 
   formatTime(
     date?: string
@@ -672,19 +953,22 @@ export class ChatPageComponent
 
 
     return parsedDate.toLocaleTimeString(
+
       'en-IN',
+
       {
         hour: '2-digit',
         minute: '2-digit'
       }
+
     );
 
   }
 
 
-  // =====================================================
+  // ==========================================
   // SCROLL
-  // =====================================================
+  // ==========================================
 
   private scrollToBottom(): void {
 

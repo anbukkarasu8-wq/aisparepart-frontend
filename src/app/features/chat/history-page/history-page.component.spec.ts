@@ -2,6 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HistoryPageComponent } from './history-page.component';
 
+declare function describe(name: string, spec: () => void): void;
+declare function beforeEach(spec: () => void | Promise<void>): void;
+declare function it(name: string, spec: () => void | Promise<void>): void;
+
 describe('HistoryPageComponent', () => {
   let component: HistoryPageComponent;
   let fixture: ComponentFixture<HistoryPageComponent>;
@@ -18,6 +22,8 @@ describe('HistoryPageComponent', () => {
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    if (!component) {
+      throw new Error('Component was not created');
+    }
   });
 });

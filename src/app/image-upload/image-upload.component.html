@@ -1,0 +1,40 @@
+<div class="upload-container">
+  <div
+    class="dropzone"
+    [class.drag-over]="isDragOver"
+    (drop)="onDrop($event)"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()">
+
+    <input
+      type="file"
+      id="fileInput"
+      accept="image/jpeg,image/png,image/webp"
+      (change)="onFileSelected($event)"
+      hidden />
+
+    <div *ngIf="!previewUrl" class="dropzone-empty">
+      <p>Drag & drop a spare part photo here</p>
+      <label for="fileInput" class="browse-btn">Browse Files</label>
+      <small>JPG, PNG or WEBP — up to 10MB</small>
+    </div>
+
+    <div *ngIf="previewUrl" class="preview">
+      <img [src]="previewUrl" alt="Preview" />
+
+      <div *ngIf="uploading" class="progress-bar">
+        <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+        <span>{{ uploadProgress }}%</span>
+      </div>
+
+      <div *ngIf="uploadedResult" class="upload-success">
+        ✅ Uploaded successfully
+        <a [href]="uploadedResult.url" target="_blank">View image</a>
+      </div>
+
+      <button *ngIf="!uploading" (click)="removeImage()" class="remove-btn">Remove</button>
+    </div>
+  </div>
+
+  <p *ngIf="error" class="error-msg">{{ error }}</p>
+</div>

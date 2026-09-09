@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>AI Spare Parts</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()" aria-label="Logout" class="logout-button">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-searchbar [(ngModel)]="searchTerm" (ionChange)="applyFilter()" placeholder="Search chats"></ion-searchbar>
+
+  <ion-list>
+    <ion-item *ngFor="let session of filteredSessions" (click)="openSession(session.id)" button>
+      <ion-label>
+        <h2>{{ session.title || getTitle(session) }}</h2>
+        <p>{{ session.createdAt | date:'short' }}</p>
+      </ion-label>
+      <ion-buttons slot="end">
+        <ion-button (click)="renameSession(session); $event.stopPropagation();" aria-label="Rename">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button (click)="deleteSession(session.session_id); $event.stopPropagation();" color="danger" aria-label="Delete">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-list>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="newChat()" aria-label="New chat">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

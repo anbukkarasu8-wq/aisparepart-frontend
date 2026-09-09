@@ -1,422 +1,204 @@
 <div class="login-page">
 
+  <!-- LEFT SIDE -->
+  <div class="login-brand">
 
-  <!-- Left side -->
-
-  <section class="login-info">
-
-    <div class="brand">
+    <div class="brand-content">
 
       <div class="brand-icon">
-        ⚙️
+        AI
       </div>
 
-      <span>
-        AI Spare Parts
-      </span>
+      <h1>AI Spare Parts</h1>
 
-    </div>
-
-
-    <div class="info-content">
-
-      <div class="ai-icon">
-        🤖
-      </div>
-
-
-      <h1>
-        Your Intelligent
-        <br>
-        Spare Parts Assistant
-      </h1>
-
-
-      <p>
-        Find compatible spare parts, check availability
-        and prepare quotations using our AI-powered
-        assistant.
+      <p class="brand-subtitle">
+        Intelligent Spare Parts Assistant
       </p>
 
+      <p class="brand-description">
+        Find the right spare parts for your vehicle
+        using our AI-powered assistant.
+      </p>
 
-      <div class="features">
+      <div class="feature-list">
 
         <div class="feature">
-
-          <span>✓</span>
-
-          <div>
-
-            <strong>
-              Smart Spare Parts Search
-            </strong>
-
-            <small>
-              Find parts based on your vehicle.
-            </small>
-
-          </div>
-
+          <span class="feature-icon">✓</span>
+          <span>Smart spare parts search</span>
         </div>
 
-
         <div class="feature">
-
-          <span>✓</span>
-
-          <div>
-
-            <strong>
-              Vehicle Compatibility
-            </strong>
-
-            <small>
-              Find parts compatible with your vehicle.
-            </small>
-
-          </div>
-
+          <span class="feature-icon">✓</span>
+          <span>Vehicle compatibility checking</span>
         </div>
 
-
         <div class="feature">
-
-          <span>✓</span>
-
-          <div>
-
-            <strong>
-              Quick Quotations
-            </strong>
-
-            <small>
-              Add products and prepare quotations.
-            </small>
-
-          </div>
-
+          <span class="feature-icon">✓</span>
+          <span>AI-powered recommendations</span>
         </div>
 
       </div>
 
     </div>
 
-
-    <div class="copyright">
-
-      © 2026 AI Spare Parts Assistant
-
-    </div>
-
-  </section>
+  </div>
 
 
-
-  <!-- Right side -->
-
-  <section class="login-section">
-
+  <!-- RIGHT SIDE -->
+  <div class="login-section">
 
     <div class="login-card">
 
+      <!-- HEADER -->
+      <div class="login-header">
 
-      <div class="mobile-brand">
+        <div class="mobile-brand-icon">
+          AI
+        </div>
 
-        ⚙️ AI Spare Parts
-
-      </div>
-
-
-      <div class="login-heading">
-
-        <h2>
-          Welcome back
-        </h2>
+        <h2>{{ isSignUp ? 'Create an account' : 'Welcome back' }}</h2>
 
         <p>
-          Login to continue to your AI assistant
+          {{ isSignUp ? 'Sign up to continue to AI Spare Parts' : 'Sign in to continue to your account' }}
         </p>
 
       </div>
 
 
-      <!-- Login Form -->
+      <!-- LOGIN / SIGNUP FORM -->
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
 
-      <form
-        [formGroup]="loginForm"
-        (ngSubmit)="login()"
-        class="login-form"
-      >
-
-
-        <!-- Email -->
-
+        <!-- EMAIL -->
         <div class="form-group">
 
           <label for="email">
             Email address
           </label>
 
+          <div class="input-wrapper">
 
-          <div
-            class="input-wrapper"
-            [class.input-error]="
-              loginForm.controls.email.touched &&
-              loginForm.controls.email.invalid
-            "
-          >
-
-            <span>
+            <span class="input-icon">
               ✉
             </span>
 
-
             <input
               id="email"
-              type="email"
-              formControlName="email"
+              name="email"
+              [(ngModel)]="email"
               placeholder="Enter your email"
+              type="email"
               autocomplete="email"
+              required
             />
 
           </div>
-
-
-          <small
-            class="validation-message"
-            *ngIf="
-              loginForm.controls.email.touched &&
-              loginForm.controls.email.hasError('required')
-            "
-          >
-
-            Email is required.
-
-          </small>
-
-
-          <small
-            class="validation-message"
-            *ngIf="
-              loginForm.controls.email.touched &&
-              loginForm.controls.email.hasError('email')
-            "
-          >
-
-            Please enter a valid email address.
-
-          </small>
 
         </div>
 
 
-
-        <!-- Password -->
-
+        <!-- PASSWORD -->
         <div class="form-group">
 
-          <div class="label-row">
+          <label for="password">
+            Password
+          </label>
 
-            <label for="password">
-              Password
-            </label>
+          <div class="input-wrapper">
 
-
-            <a href="javascript:void(0)">
-              Forgot password?
-            </a>
-
-          </div>
-
-
-          <div
-            class="input-wrapper"
-            [class.input-error]="
-              loginForm.controls.password.touched &&
-              loginForm.controls.password.invalid
-            "
-          >
-
-            <span>
+            <span class="input-icon">
               🔒
             </span>
 
-
             <input
               id="password"
-              [type]="
-                showPassword
-                  ? 'text'
-                  : 'password'
-              "
-              formControlName="password"
+              name="password"
+              [(ngModel)]="password"
+              [type]="showPassword ? 'text' : 'password'"
               placeholder="Enter your password"
               autocomplete="current-password"
+              required
             />
-
 
             <button
               type="button"
-              class="password-button"
-              (click)="togglePassword()"
+              class="password-toggle"
+              (click)="showPassword = !showPassword"
+              aria-label="Toggle password visibility"
             >
-
-              {{ showPassword ? '🙈' : '👁' }}
-
+              {{ showPassword ? 'Hide' : 'Show' }}
             </button>
 
           </div>
 
-
-          <small
-            class="validation-message"
-            *ngIf="
-              loginForm.controls.password.touched &&
-              loginForm.controls.password.hasError('required')
-            "
-          >
-
-            Password is required.
-
-          </small>
-
-
-          <small
-            class="validation-message"
-            *ngIf="
-              loginForm.controls.password.touched &&
-              loginForm.controls.password.hasError('minlength')
-            "
-          >
-
-            Password must contain at least 6 characters.
-
-          </small>
-
         </div>
 
 
-
-        <!-- Remember -->
-
-        <div class="remember-row">
-
-          <label>
-
-            <input
-              type="checkbox"
-            />
-
-            <span>
-              Remember me
-            </span>
-
-          </label>
-
-        </div>
-
-
-
-        <!-- Login Error -->
-
+        <!-- ERROR -->
         <div
-          class="login-error"
-          *ngIf="loginError"
+          class="error-message"
+          *ngIf="error"
         >
-
-          ⚠️
-
-          {{ loginError }}
-
+          <span>!</span>
+          {{ error }}
         </div>
 
 
-
-        <!-- Login button -->
-
+        <!-- LOGIN / SIGNUP BUTTON -->
         <button
           type="submit"
           class="login-button"
-          [disabled]="isLoading"
+          [disabled]="loginForm.invalid || loading"
         >
 
-          <span *ngIf="!isLoading">
-            Login
-          </span>
+          <span
+            class="spinner"
+            *ngIf="loading"
+          ></span>
 
-
-          <span *ngIf="isLoading">
-            Logging in...
+          <span>
+            {{ loading ? (isSignUp ? 'Creating account...' : 'Signing in...') : (isSignUp ? 'Create account' : 'Sign in') }}
           </span>
 
         </button>
-
 
       </form>
 
 
+      <!-- REGISTER / LOGIN TOGGLE -->
+      <div class="register-section">
 
-      <!-- Demo account -->
+        <ng-container *ngIf="!isSignUp">
+          <span>
+            Don't have an account?
+          </span>
 
-      <div class="demo-box">
+          <a routerLink="/register" (click)="setMode(true)">
+            Create an account
+          </a>
+        </ng-container>
 
-        <div class="demo-title">
+        <ng-container *ngIf="isSignUp">
+          <span>
+            Already have an account?
+          </span>
 
-          Demo Login
-
-        </div>
-
-
-        <div class="demo-details">
-
-          <div>
-            <strong>Email:</strong>
-            user&#64;example.com
-          </div>
-
-          <div>
-            <strong>Password:</strong>
-            123456
-          </div>
-
-        </div>
-
-
-        <button
-          type="button"
-          (click)="useDemoLogin()"
-        >
-
-          Use Demo Account
-
-        </button>
+          <a routerLink="/login" (click)="setMode(false)">
+            Sign in
+          </a>
+        </ng-container>
 
       </div>
 
 
-      <!-- Register -->
-
-      <div class="register">
-
-        Don't have an account?
-
-        <a href="javascript:void(0)">
-          Create account
-        </a>
-
-      </div>
-
-
-      <!-- Security -->
-
-      <div class="security">
-
-        🔒 Your information is securely protected.
-
+      <!-- FOOTER -->
+      <div class="login-footer">
+        <span>AI Spare Parts</span>
+        <span>•</span>
+        <span>Secure Login</span>
       </div>
 
     </div>
 
-  </section>
+  </div>
 
 </div>

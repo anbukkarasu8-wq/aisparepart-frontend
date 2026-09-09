@@ -1,14 +1,8 @@
-import {
-  Injectable
-} from '@angular/core';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-import {
-  HttpClient
-} from '@angular/common/http';
-
-import {
-  Observable
-} from 'rxjs';
+import { API_BASE_URL } from '../../api-config';
 
 
 // =====================================================
@@ -25,6 +19,8 @@ export interface ChatMessage {
 
   message: string;
 
+  image_url?: string | null;
+
   created_at?: string;
 
 }
@@ -36,13 +32,17 @@ export interface ChatMessage {
 
 export interface ChatResponse {
 
-  success: boolean;
+  message: string;
 
   session_id: string;
 
-  user_message: string;
+  user_id: number;
 
-  response: string;
+  answer?: string;
+
+  response?: string;
+
+  image_url?: string | null;
 
 }
 
@@ -53,11 +53,11 @@ export interface ChatResponse {
 
 export interface ChatHistoryResponse {
 
-  success: boolean;
+  message: string;
 
   session_id: string;
 
-  messages: ChatMessage[];
+  data: ChatMessage[];
 
 }
 
@@ -70,9 +70,15 @@ export interface ChatSession {
 
   session_id: string;
 
-  last_message: string;
+  user_id: number;
+
+  title: string | null;
+
+  last_message: string | null;
 
   created_at?: string;
+
+  updated_at?: string;
 
 }
 
@@ -83,9 +89,43 @@ export interface ChatSession {
 
 export interface ChatSessionsResponse {
 
-  success: boolean;
+  message: string;
 
-  sessions: ChatSession[];
+  user_id: number;
+
+  data: ChatSession[];
+
+}
+
+
+// =====================================================
+// SEARCH HISTORY
+// =====================================================
+
+export interface SearchHistory {
+
+  id: number;
+
+  user_id: number;
+
+  message: string;
+
+  created_at?: string;
+
+}
+
+
+// =====================================================
+// SEARCH HISTORY RESPONSE
+// =====================================================
+
+export interface SearchHistoryResponse {
+
+  message: string;
+
+  user_id: number;
+
+  data: SearchHistory[];
 
 }
 
@@ -97,13 +137,19 @@ export interface ChatSessionsResponse {
 @Injectable({
   providedIn: 'root'
 })
-
 export class ChatService {
 
 
-  private apiUrl =
-    'http://localhost:3000';
+  // ===================================================
+  // BACKEND URL
+  // ===================================================
 
+  private readonly apiUrl = API_BASE_URL;
+
+
+  // ===================================================
+  // CONSTRUCTOR
+  // ===================================================
 
   constructor(
     private http: HttpClient
@@ -116,22 +162,42 @@ export class ChatService {
 
   sendMessage(
     sessionId: string,
-    message: string
+    message: string,
+    imageUrl?: string | null
   ): Observable<ChatResponse> {
+
+    const payload: {
+      session_id: string;
+      message: string;
+      image_url?: string;
+    } = {
+      session_id: sessionId,
+      message: message
+    };
+
+
+    if (imageUrl) {
+
+      payload.image_url = imageUrl;
+
+    }
+
+
+    console.log(
+      'CHAT SERVICE: Sending message'
+    );
+
+    console.log(
+      'CHAT SERVICE URL:',
+      `${this.apiUrl}/chat`
+    );
+
 
     return this.http.post<ChatResponse>(
 
       `${this.apiUrl}/chat`,
 
-      {
-
-        session_id:
-          sessionId,
-
-        message:
-          message
-
-      }
+      payload
 
     );
 
@@ -146,6 +212,10 @@ export class ChatService {
     sessionId: string
   ): Observable<ChatHistoryResponse> {
 
+    console.log(
+      'CHAT SERVICE: Getting chat history'
+    );
+
     return this.http.get<ChatHistoryResponse>(
 
       `${this.apiUrl}/chat/history/${encodeURIComponent(sessionId)}`
@@ -159,12 +229,43 @@ export class ChatService {
   // GET ALL CHAT SESSIONS
   // ===================================================
 
-  getChatSessions():
-    Observable<ChatSessionsResponse> {
+  getChatSessions(): Observable<ChatSessionsResponse> {
+
+    console.log(
+      'CHAT SERVICE: Getting chat sessions'
+    );
 
     return this.http.get<ChatSessionsResponse>(
 
       `${this.apiUrl}/chat/sessions`
+
+    );
+
+  }
+
+  // ===================================================
+  // DELETE CHAT SESSION
+  // ===================================================
+
+  deleteChatSession(sessionId: string): Observable<any> {
+    console.log('CHAT SERVICE: Deleting chat session', sessionId);
+    return this.http.delete<any>(
+      `${this.apiUrl}/chat/sessions/${encodeURIComponent(sessionId)}`
+    );
+  }
+
+
+  // ===================================================
+  // GET SEARCH HISTORY
+  // ===================================================
+
+  getSearchHistory(
+    userId: number
+  ): Observable<SearchHistoryResponse> {
+
+    return this.http.get<SearchHistoryResponse>(
+
+      `${this.apiUrl}/search/${userId}`
 
     );
 

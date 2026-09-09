@@ -22,8 +22,7 @@ import {
 })
 export class SpareService {
 
-  private apiUrl =
-    'http://localhost:3000';
+  private apiUrl ='https://koala-mothproof-antelope.ngrok-free.dev';
 
 
   constructor(

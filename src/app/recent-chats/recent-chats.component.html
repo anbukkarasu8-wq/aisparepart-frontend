@@ -1,0 +1,27 @@
+<div class="recent-chats">
+  <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="applyFilter()"></ion-searchbar>
+
+  <ion-list *ngIf="!loading && filteredSessions.length > 0">
+    <ion-item *ngFor="let session of filteredSessions" (click)="openSession(session.id)" button>
+      <ion-label>
+        <h2>Chat {{ session.id }}</h2>
+        <p>{{ session.created_at | date:'short' }}</p>
+      </ion-label>
+      <ion-buttons slot="end">
+        <ion-button (click)="deleteSession(session.id); $event.stopPropagation()" fill="clear">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-list>
+
+  <ion-item *ngIf="!loading && filteredSessions.length === 0">
+    <ion-label>No recent chats.</ion-label>
+  </ion-item>
+
+  <ion-spinner *ngIf="loading"></ion-spinner>
+
+  <ion-item *ngIf="errorMessage">
+    <ion-label color="danger">{{ errorMessage }}</ion-label>
+  </ion-item>
+</div>
